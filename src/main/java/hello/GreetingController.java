@@ -19,7 +19,7 @@ public class GreetingController {
 
     public GreetingController() {
         this.environment = new World(40,40);
-        initAgents(800);//PARAMETRIZABLE
+        initAgents(10);//PARAMETRIZABLE
     }
 
     private void initAgents(Integer numberOfAgents) {
