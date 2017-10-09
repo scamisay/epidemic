@@ -1,8 +1,11 @@
 package hello.domain;
 
-import javax.swing.text.Position;
+import hello.domain.agent.AgentContainer;
+import hello.domain.agent.AgentType;
+import hello.helper.MapWalker;
+
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,6 +16,7 @@ public class World {
     private Set<Point> currentPositions;
     private Integer rows;
     private Integer cols;
+    private Set<AgentContainer> agentBodies;
 
     private World(){}
 
@@ -22,6 +26,7 @@ public class World {
         this.cols = cols;
 
         currentPositions = new HashSet<>();
+        agentBodies = new HashSet<>();
     }
 
     public Set<Point> getCurrentPositions() {
@@ -48,20 +53,20 @@ public class World {
         Point dest = null;
         switch (direction){
             case UP: if(isValidRow(position.getI()+1)){
-                dest = position.setI(position.getI()+1);
+                dest = position.setIClonning(position.getI()+1);
                 }
                 break;
             case DOWN:if(isValidRow(position.getI()-1)){
-                dest = position.setI(position.getI()-1);
+                dest = position.setIClonning(position.getI()-1);
                 }
                 break;
 
             case LEFT:if(isValidCol(position.getI()-1)){
-                dest = position.setJ(position.getI()-1);
+                dest = position.setJClonning(position.getI()-1);
                 }
                 break;
             case RIGHT:if(isValidCol(position.getI()+1)){
-                dest = position.setJ(position.getI()+1);
+                dest = position.setJClonning(position.getI()+1);
                 }
                 break;
         }
@@ -98,5 +103,34 @@ public class World {
         Integer i = new Double( Math.random()*rows).intValue();
         Integer j = new Double( Math.random()*cols).intValue();
         return new Point(i, j);
+    }
+
+    public void createAgents(Map configuration) {
+        MapWalker walker = new MapWalker(configuration);
+        Integer agentId = 1;
+        for(AgentType agentType: AgentType.values()){
+            Map agentConfiguration = (Map)walker.walk("agents."+agentType.name());
+            MapWalker agentWalker = new MapWalker(agentConfiguration);
+            Integer quantity = agentWalker.walkInteger("quantity");
+            for(int i = 0 ; i<quantity ; i++, agentId++){
+                String agentName = agentId.toString();
+
+                Point startingPosition = getSomeAvailablePosition();
+                startingPosition.getData().put("agentType", agentType.name());
+                startingPosition.getData().put("name", agentName);
+
+                AgentContainer agentBody = AgentContainer.createAgent(
+                        agentType,
+                        agentName,
+                        this,
+                        startingPosition
+                        );
+                agentBodies.add(agentBody);
+            }
+
+        }
+
+        //ahora inicializo cada agent
+        agentBodies.forEach( agent -> agent.start());
     }
 }

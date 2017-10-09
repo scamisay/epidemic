@@ -1,6 +1,7 @@
-function Point(i,j){
+function Point(i,j,data){
     var i = i;
     var j = j;
+    var data = data;
 
     this.getI = function(){
         return i;
@@ -8,6 +9,10 @@ function Point(i,j){
 
     this.getJ = function(){
         return j;
+    }
+
+    this.getData = function(){
+        return data;
     }
 }
 
@@ -25,17 +30,37 @@ function Environment(width, height){
 
     //public methods
     this.refresh = function(points){
-        //var points = readFromServer();
         env.clear();
         points.map(
             function(point){
-                env.drawRect(point.getI(), point.getJ());
+                env.drawRect(point.getI(), point.getJ(), point.getData());
             });
     }
 
-    this.drawRect = function(i,j){
-        ctx.fillStyle = 'rgb(0,200,0)'; // sets the color to fill in the rectangle with
-        ctx.fillRect(i*GRID_WIDTH,j*GRID_WIDTH , GRID_WIDTH, GRID_WIDTH);
+    this.drawRect = function(i,j, properties){
+
+        var iPos = i*GRID_WIDTH;
+        var jPos = j*GRID_WIDTH;
+
+        var color = findColorByAgentType(properties.agentType);
+        ctx.fillStyle = color;
+        ctx.fillRect(iPos,jPos , GRID_WIDTH, GRID_WIDTH);
+
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText(properties.name,iPos+GRID_WIDTH/4,jPos+GRID_WIDTH/1.5);
+    }
+
+    function findColorByAgentType(agentType){
+        if(agentType == 'healthy'){
+            return 'rgb(0,200,0)';
+        }else if(agentType == 'therapist'){
+            return 'rgb(0,0,200)';
+        }else if(agentType == 'infected'){
+            return 'rgb(200,0,0)';
+        }else{//cured
+            return 'rgb(200,200,200)';
+        }
     }
 
     this.clear = function(){
@@ -64,6 +89,9 @@ function sendName() {
     stompClient.send("/app/hello", {}, JSON.stringify({'name': $("#name").val()}));
 }
 
+function configure(configuration) {
+    stompClient.send("/app/configure", {}, JSON.stringify(configuration));
+}
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -77,7 +105,7 @@ function setConnected(connected) {
     $("#greetings").html("");
 }
 
-function connect() {
+function connect(configuration) {
     var socket = new SockJS('/gs-guide-websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
@@ -86,7 +114,8 @@ function connect() {
         stompClient.subscribe('/topic/greetings', function (greeting) {
             showGreeting(JSON.parse(greeting.body).content);
         });
-        env = new Environment(40,40);
+        configure(configuration);
+        env = new Environment(configuration.environment.width,configuration.environment.height);
         setInterval(function(){sendName()},REFRESH_FRECUENCY);
     });
 }
@@ -101,7 +130,7 @@ function disconnect() {
 
 
 function showGreeting(message) {
-    var points = eval(message).map(function(p){return new Point(p.i,p.j);})
+    var points = eval(message).map(function(p){return new Point(p.i, p.j, p.data);})
     env.refresh(points);
     //$("#greetings").append("<tr><td>" + message + "</td></tr>");
 }
@@ -113,7 +142,10 @@ $(function () {
     $( "#connect" ).click(function() { connect(); });
     $( "#disconnect" ).click(function() { disconnect(); });
     $( "#send" ).click(function() { sendName(); });
-});
 
+    //iniciar configuracion
+    $("#myModal").modal('show');
+
+});
 
 

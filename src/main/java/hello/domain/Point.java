@@ -1,5 +1,6 @@
 package hello.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,6 +15,14 @@ public class Point {
         new DomainHelper().checkPositive(i,j);
         this.i = i;
         this.j = j;
+        this.data = new HashMap();
+    }
+
+    public Point(Integer i, Integer j, Map data) {
+        new DomainHelper().checkPositive(i,j);
+        this.i = i;
+        this.j = j;
+        this.data = data;
     }
 
     public Integer getI() {
@@ -28,12 +37,12 @@ public class Point {
         return data;
     }
 
-    public Point setI(Integer i) {
-        return new Point(i,j);
+    public Point setIClonning(Integer i) {
+        return new Point(i,j,data);
     }
 
-    public Point setJ(Integer j) {
-        return new Point(i,j);
+    public Point setJClonning(Integer j) {
+        return new Point(i,j,data);
     }
 
     public Point setData(Map data) {

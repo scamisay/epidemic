@@ -5,6 +5,7 @@
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet">
     <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
@@ -53,6 +54,132 @@
 
     <canvas></canvas>
 
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Configuración</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="environment" class="form-inline">
+                        <h3>Ambiente</h3>
+                        <div class="form-group">
+                            <label>Ancho:</label>
+                            <input type="number" step="1" min="1" value="20" class="form-control" name="width">
+                        </div>
+                        <div class="form-group">
+                            <label>Alto:</label>
+                            <input type="number" step="1" min="1" value="20" class="form-control" name="height">
+                        </div>
+                    </form>
+
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <form id="healthy" class="form-horizontal">
+                                <h3>Sanos</h3>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Cantidad:</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" step="1" min="1" value="10" class="form-control" name="quantity">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <form id="therapist" class="form-horizontal">
+                                <h3>Terapeutas</h3>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Cantidad:</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" step="1" min="1" value="0" class="form-control" name="quantity">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <form id="infected" class="form-horizontal">
+                                <h3>Infectados</h3>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Cantidad:</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" step="1" min="1" value="0" class="form-control" name="quantity">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <form id="cured" class="form-horizontal">
+                                <h3>Curados</h3>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Cantidad:</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" step="1" min="1" value="0" class="form-control" name="quantity">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="save" onclick="configurationHandler()" class="btn btn-width bkgrnd-cyan save-details" type="button" name="save-details">Iniciar Simulación</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 </div>
+
+<script>
+    /*$("#save").on("click", function(e){
+        e.preventDefault(); // prevent de default action, which is to submit
+        // or call the save function here
+        // save();
+        $(this).prev().click();
+
+    });*/
+
+    function form2Json(form) {
+        var obj = {};
+        var elements = form.querySelectorAll( "input, select, textarea" );
+        for( var i = 0; i < elements.length; ++i ) {
+            var element = elements[i];
+            var name = element.name;
+            var value = element.value;
+
+            if( name ) {
+                obj[ name ] = value;
+            }
+        }
+        return obj;
+    }
+
+    function buildConfiguration(){
+        return {
+            environment : form2Json(document.querySelector('#environment')),
+            agents : {
+                healthy : form2Json(document.querySelector('#healthy')),
+                therapist : form2Json(document.querySelector('#therapist')),
+                infected : form2Json(document.querySelector('#infected')),
+                cured : form2Json(document.querySelector('#cured'))
+            }
+        };
+    }
+
+    function configurationHandler() {
+        connect(buildConfiguration());
+        $('#myModal').modal('toggle');
+    }
+</script>
+
 </body>
 </html>

@@ -4,6 +4,7 @@ import hello.domain.DomainHelper;
 import hello.domain.Point;
 import hello.domain.World;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -11,15 +12,13 @@ import java.util.Map;
  */
 public abstract class Agent {
 
-    protected Point currentPosition;
-    protected World environment;
+    protected AgentContainer body;
     protected Map<Action,Double> actionsProbabilities;
 
-    public Agent(Point currentPosition, World environment, Map<Action, Double> actionsProbabilities) {
-        new DomainHelper().checkNotNull(currentPosition, environment, actionsProbabilities);
-        this.currentPosition = currentPosition;
-        this.environment = environment;
-        this.actionsProbabilities = actionsProbabilities;
+    public Agent(AgentContainer body, Map<Action, Double> actionsProbabilities) {
+        new DomainHelper().checkNotNull(body);
+        this.body = body;
+        this.actionsProbabilities = (actionsProbabilities == null)? new HashMap<>(): actionsProbabilities;
     }
 
     protected abstract void _do();
@@ -40,11 +39,23 @@ public abstract class Agent {
         return chance <= findActionProbability(action);
     }
 
+    private final Double DEFAULT_PROBABILITY = 0.5;
+
     protected Double findActionProbability(Action action){
+        Double prob = null;
         try{
-            return actionsProbabilities.get(action);
+            prob = actionsProbabilities.get(action);
+            if(prob == null){
+                return DEFAULT_PROBABILITY;
+            }else {
+                return prob;
+            }
         }catch (Exception e){
-            return 0.5;
+            return DEFAULT_PROBABILITY;
         }
+    }
+
+    protected AgentContainer getBody(){
+        return body;
     }
 }

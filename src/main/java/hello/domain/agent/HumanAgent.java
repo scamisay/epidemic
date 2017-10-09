@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public abstract class HumanAgent extends Agent {
 
-    public HumanAgent(Point currentPosition, World environment, Map<Action, Double> actionsProbabilities) {
-        super(currentPosition, environment, actionsProbabilities);
+    public HumanAgent(AgentContainer body, Map<Action, Double> actionsProbabilities) {
+        super(body, actionsProbabilities);
     }
 
     protected abstract void move();
