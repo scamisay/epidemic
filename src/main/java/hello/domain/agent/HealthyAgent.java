@@ -4,6 +4,7 @@ import hello.domain.Direction;
 import hello.domain.Point;
 import hello.domain.World;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,6 +19,20 @@ public class HealthyAgent extends HumanAgent {
     @Override
     public void _do() {
         if (decide(Action.MOVE)) move();
+    }
+
+    @Override
+    public void receiveMessage(Agent sender, String message) {
+        if(decide(Action.RECEIVE_MESSAGE)){
+            if(message.equals(Action.INFECT.name())){
+                body.setAgent(new InfectedAgent(body, new HashMap<>()));
+            }
+        }
+    }
+
+    @Override
+    protected AgentType getAgentType() {
+        return AgentType.healthy;
     }
 
     @Override

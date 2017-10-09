@@ -28,11 +28,7 @@ public abstract class Agent {
             receiver.receiveMessage(this, message);
     }
 
-    public void receiveMessage(Agent sender, String message){
-        if(decide(Action.RECEIVE_MESSAGE)){
-            //DO SOMETHING
-        }
-    }
+    public abstract void receiveMessage(Agent sender, String message);
 
     protected boolean decide(Action action){
         Double chance = Math.random();
@@ -58,4 +54,6 @@ public abstract class Agent {
     protected AgentContainer getBody(){
         return body;
     }
+
+    protected abstract AgentType getAgentType();
 }

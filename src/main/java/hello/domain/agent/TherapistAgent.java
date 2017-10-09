@@ -3,6 +3,7 @@ package hello.domain.agent;
 import hello.domain.Direction;
 import hello.domain.Point;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class TherapistAgent extends HumanAgent{
@@ -14,6 +15,20 @@ public class TherapistAgent extends HumanAgent{
     @Override
     public void _do() {
         if (decide(Action.MOVE)) move();
+    }
+
+    @Override
+    public void receiveMessage(Agent sender, String message) {
+        if(decide(Action.RECEIVE_MESSAGE)){
+            if(message.equals(Action.INFECT.name())){
+                body.setAgent(new InfectedAgent(body, new HashMap<>()));
+            }
+        }
+    }
+
+    @Override
+    protected AgentType getAgentType() {
+        return AgentType.therapist;
     }
 
     @Override

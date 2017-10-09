@@ -52,9 +52,16 @@ public class AgentContainer extends Thread{
         return currentPosition;
     }
 
-    private void setAgent(Agent agent){
-        if(agent != null)
+    public Agent getAgent() {
+        return agent;
+    }
+
+    protected synchronized void setAgent(Agent agent){
+        if(agent != null){
             this.agent = agent;
+            getCurrentPosition().getData().put("agentType", agent.getAgentType().name());
+            getEnvironment().updatePosition(getCurrentPosition());
+        }
     }
 
     protected void changeCurrentPosition(Point newPosition){

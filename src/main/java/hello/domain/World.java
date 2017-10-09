@@ -1,12 +1,15 @@
 package hello.domain;
 
+import hello.domain.agent.Agent;
 import hello.domain.agent.AgentContainer;
 import hello.domain.agent.AgentType;
 import hello.helper.MapWalker;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by scamisay on 03/10/17.
@@ -49,27 +52,54 @@ public class World {
         return 0 <= j && j < cols;
     }
 
-    public Point move(Point position, Direction direction) {
+    private Point logicalMove(Point position, Direction direction){
         Point dest = null;
         switch (direction){
             case UP: if(isValidRow(position.getI()+1)){
                 dest = position.setIClonning(position.getI()+1);
-                }
+            }
                 break;
             case DOWN:if(isValidRow(position.getI()-1)){
                 dest = position.setIClonning(position.getI()-1);
-                }
+            }
                 break;
 
-            case LEFT:if(isValidCol(position.getI()-1)){
-                dest = position.setJClonning(position.getI()-1);
-                }
+            case LEFT:if(isValidCol(position.getJ()-1)){
+                dest = position.setJClonning(position.getJ()-1);
+            }
                 break;
-            case RIGHT:if(isValidCol(position.getI()+1)){
-                dest = position.setJClonning(position.getI()+1);
-                }
+            case RIGHT:if(isValidCol(position.getJ()+1)){
+                dest = position.setJClonning(position.getJ()+1);
+            }
                 break;
+
+            case RIGHT_UP:if(isValidCol(position.getJ()+1) && isValidRow(position.getI()+1)){
+                dest = position.setJClonning(position.getJ()+1).setIClonning(position.getI()+1);
+            }
+                break;
+
+            case RIGHT_DOWN:if(isValidCol(position.getJ()+1) && isValidRow(position.getI()-1)){
+                dest = position.setJClonning(position.getJ()+1).setIClonning(position.getI()-1);
+            }
+                break;
+
+            case LEFT_UP:if(isValidCol(position.getJ()-1)&& isValidRow(position.getI()+1)){
+                dest = position.setJClonning(position.getJ()-1).setIClonning(position.getI()+1);
+            }
+                break;
+
+            case LEFT_DOWN:if(isValidCol(position.getJ()-1) && isValidRow(position.getI()-1)){
+                dest = position.setJClonning(position.getJ()-1).setIClonning(position.getI()-1);
+            }
+                break;
+
+
         }
+        return dest;
+    }
+
+    public Point move(Point position, Direction direction) {
+        Point dest = logicalMove(position, direction);
 
         if(dest != null && !dest.equals(position)){
             try{
@@ -132,5 +162,26 @@ public class World {
 
         //ahora inicializo cada agent
         agentBodies.forEach( agent -> agent.start());
+    }
+
+    public Set<Agent> findNeighbours(Point currentPosition) {
+        Set<Point> neighboursPointsWithAgents =
+                findNeighbourPoints(currentPosition).stream()
+                .filter(point -> currentPositions.contains(point))
+                .collect(Collectors.toSet());
+
+        return agentBodies.stream()
+                .filter( body -> neighboursPointsWithAgents.contains(body.getCurrentPosition()))
+                .map( body -> body.getAgent())
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Point> findNeighbourPoints(Point currentPosition) {
+        return Arrays.stream(Direction.values()).map(direction -> logicalMove(currentPosition, direction)).collect(Collectors.toSet());
+    }
+
+    public synchronized void updatePosition(Point currentPosition) {
+        currentPositions.remove(currentPosition);
+        currentPositions.add(currentPosition);
     }
 }
